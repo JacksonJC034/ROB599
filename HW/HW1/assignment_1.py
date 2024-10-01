@@ -23,8 +23,8 @@ def generate_edges(n, phi):
     """
     # ------------------------------------------------
     # FILL WITH YOUR CODE
-
-    cone_edges = None # TODO: Replace None with your result
+    Theta = 2 * np.pi * np.arange(n) / n
+    cone_edges = np.array([np.cos(Theta)*np.cos(phi), np.sin(Theta)*np.cos(phi), np.ones(n)*np.sin(phi)]).T
     # ------------------------------------------------
     assert isinstance(cone_edges, np.ndarray), 'Wrong return type for generate_edges. Make sure it is a np.ndarray'
     return cone_edges
@@ -44,8 +44,9 @@ def compute_normals(cone_edges):
     """
     # ------------------------------------------------
     # FILL WITH YOUR CODE
-
-    facet_normals = None  # TODO: Replace None with your result
+    V = cone_edges
+    V_next = np.roll(V, -1, axis=0)
+    facet_normals = np.cross(V, V_next, axis=1)
     # ------------------------------------------------
     assert isinstance(facet_normals, np.ndarray), 'Wrong return type for compute_normals. Make sure it is a np.ndarray'
     return facet_normals
@@ -67,8 +68,8 @@ def compute_minimum_distance_from_facet_normals(a, facet_normals):
     """
     # ------------------------------------------------
     # FILL WITH YOUR CODE
-
-    minimum_distance = None  # TODO: Replace None with your result
+    minimum_distance = np.min(np.dot(facet_normals, a)/np.linalg.norm(facet_normals, axis=1, keepdims=True))
+    import pdb; pdb.set_trace()
     # ------------------------------------------------
     assert isinstance(minimum_distance, float), 'Wrong return type for compute_minimum_distance_from_facet_normals. Make sure it is a float'
 
@@ -93,7 +94,7 @@ def compute_minimum_distance(a, n, phi):
     # ------------------------------------------------
     # FILL WITH YOUR CODE
 
-    minimum_distance = None  # TODO: Replace None with your result
+    minimum_distance = compute_minimum_distance_from_facet_normals(a, compute_normals(generate_edges(n, phi)))
     # ------------------------------------------------
     assert isinstance(minimum_distance, float), 'Wrong return type for compute_minimum_distance. Make sure it is a float'
     return minimum_distance
@@ -117,7 +118,7 @@ def check_is_interior_point(a, n, phi):
     # ------------------------------------------------
     # FILL WITH YOUR CODE
 
-    is_interior_point = None  # TODO: Replace None with your result
+    is_interior_point = float(compute_minimum_distance(a, n, phi)) >= 0
     # ------------------------------------------------
     assert isinstance(is_interior_point, bool), 'Wrong return type for check_is_interior_point. Make sure it is a bool'
     return is_interior_point
@@ -127,8 +128,8 @@ if __name__ == "__main__":
     # You can use this main function to test your code with some test values
 
     # Test values
-    phi = 30. * np.pi / 180.
-    n = 4
+    phi = 0.4
+    n = 5
     a = np.array([0.00, 0.01, 1.00])
 
     # Example for testing your functions
@@ -139,12 +140,12 @@ if __name__ == "__main__":
     import doctest
 
     # Run tests cases for all functions:
-    # doctest.testmod(verbose=True) # Uncomment to test all functions
+    doctest.testmod(verbose=True) # Uncomment to test all functions
 
     # Tests for only a desired function (uncomment the one for the function to test):
     # doctest.run_docstring_examples(generate_edges, globals(), verbose=True)   # Uncomment to test generate_edges
     # doctest.run_docstring_examples(compute_normals, globals(), verbose=True)  # Uncomment to test compute_normals
-    # doctest.run_docstring_examples(compute_minimum_distance_from_facet_normals, globals(), verbose=True)  # Uncomment to test compute_minimum_distance_from_facet_normals
+    doctest.run_docstring_examples(compute_minimum_distance_from_facet_normals, globals(), verbose=True)  # Uncomment to test compute_minimum_distance_from_facet_normals
     # doctest.run_docstring_examples(compute_minimum_distance, globals(), verbose=True) # Uncomment to test compute_minimum_distance
     # doctest.run_docstring_examples(check_is_interior_point, globals(), verbose=True)  # Uncomment to test check_is_interior_point
 
