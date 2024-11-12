@@ -2,6 +2,7 @@ import numpy as np
 import pybullet as p
 import pybullet_data
 import time
+import matplotlib.pyplot as plt
 np.set_printoptions(precision=3)
 
 PLANE_H = 0.03
@@ -48,9 +49,14 @@ class Env:
                               basePosition=[x0, y0, PLANE_H],
                               useFixedBase=False)
 
-    def simulate(self, max_t=600):
+    def simulate(self, max_t=300):
+        x_distances = []
+        y_distances = []
         for sim_step in range(max_t):
             q, v = self.get_state()
+            x_distances.append(abs(q[0]))
+            y_distances.append(abs(q[1]))
+
             u = dmp_control(q, v)
             if self.with_obs:
                 u = u + collision_avoidance(q, v)
@@ -58,6 +64,16 @@ class Env:
             p.stepSimulation()
             # print(self.get_state())
             time.sleep(0.01)
+            
+        # Plotting x and y distances over time
+        plt.figure(figsize=(10, 5))
+        plt.plot(x_distances, label='X Distance to Goal')
+        plt.plot(y_distances, label='Y Distance to Goal')
+        plt.xlabel('Time Step')
+        plt.ylabel('Distance to Goal')
+        plt.title('Distance to Goal (0, 0) Over Time')
+        plt.legend()
+        plt.show()
 
     def get_state(self):
         q, ori = p.getBasePositionAndOrientation(self.rob)
@@ -88,7 +104,12 @@ def dmp_control(q, v, qd=np.zeros((2, )), vd=np.zeros((2, ))):
     u = np.zeros(2)
     #########################################
 
-    # Your code here
+    k = 200.0  # Spring constant
+    c = 2.0 * np.sqrt(k)  # Damping constant for critical damping
+
+    pos_error = qd - q
+    vel_error = vd - v
+    u = ROBOT_MASS * (k * pos_error + c * vel_error)
 
     #########################################
     return u
@@ -104,18 +125,34 @@ def collision_avoidance(q, v, qd=np.array([0., 0.]), OBS=OBS):
         :return: u: np.array((2, )) -- collision avoidance control
     """
     u = np.zeros(2)
-    gamma = 150.
-    beta = 3.5
+    gamma = 200.
+    beta = 5
     #########################################
 
-    # Your code here
+    for obs in OBS:
+
+        direction_to_obs = obs[:2] - q
+        distance_to_obs = np.linalg.norm(direction_to_obs)
+        
+        if distance_to_obs < 1e-5 or np.linalg.norm(v) < 1e-5:
+            continue
+
+        cos_phi = np.dot(direction_to_obs, v) / (distance_to_obs * np.linalg.norm(v))
+        phi = np.arccos(np.clip(cos_phi, -1.0, 1.0))
+        
+        rotation_matrix = np.array([[0, -1], [1, 0]])
+        Rv = rotation_matrix @ v
+        
+        u_coll_avoid = gamma * Rv * phi * np.exp(-beta * abs(phi))
+        
+        u += u_coll_avoid
 
     #########################################
     return u
 
 
 def main(with_obs=False):
-    env = Env(with_obs)  # env = Env(with_obs=True)
+    env = Env(with_obs=True)
     env.simulate()
 
 
