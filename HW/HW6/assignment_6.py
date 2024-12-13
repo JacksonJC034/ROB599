@@ -21,7 +21,6 @@ def get_antipodal(pcd):
     best_pair = None
     best_score = -np.inf  # Keep track of how "good" the pair is (dot product closeness to -1)
     
-    # Simple brute force approach:
     N = pc_points.shape[0]
     for i in range(N):
         p1 = pc_points[i]
@@ -29,7 +28,6 @@ def get_antipodal(pcd):
         
         # Look for opposite normals
         # Condition: n1 dot n2 ≈ -1
-        # Precompute opposite normal
         opp_normal = -n1
         
         # Compute dot products with all normals to find candidates
@@ -64,14 +62,12 @@ def get_antipodal(pcd):
     p1, p2, n1, n2 = best_pair
     grasp_center = 0.5 * (p1 + p2)
     
-    # Compute orientation angle
+    # Compute theta
     d = p2 - p1
-    # angle relative to x-axis
     theta = np.arctan2(d[1], d[0])
     
-    # Set gripper z a bit above the contact points
-    # Add a small offset above the object
-    z_gripper = max(p1[2], p2[2]) + 0.02
+    # Set gripper z a bit above the contact points (offest is not needed (tested))
+    z_gripper = max(p1[2], p2[2])
     
     gripper_pose = np.array([grasp_center[0], grasp_center[1], z_gripper, theta])
     # ------------------------------------------------
