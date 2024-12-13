@@ -16,11 +16,64 @@ def get_antipodal(pcd):
 
     # ------------------------------------------------
     # FILL WITH YOUR CODE
-
-    # gripper orientation - replace 0. with your calculations
-    theta = 0.
-    # gripper pose: (x, y, z, theta) - replace 0. with your calculations
-    gripper_pose = np.array([0., 0., 0., theta])
+    w_max = 0.15
+    
+    best_pair = None
+    best_score = -np.inf  # Keep track of how "good" the pair is (dot product closeness to -1)
+    
+    # Simple brute force approach:
+    N = pc_points.shape[0]
+    for i in range(N):
+        p1 = pc_points[i]
+        n1 = pc_normals[i]
+        
+        # Look for opposite normals
+        # Condition: n1 dot n2 ≈ -1
+        # Precompute opposite normal
+        opp_normal = -n1
+        
+        # Compute dot products with all normals to find candidates
+        dot_products = np.einsum('ij,j->i', pc_normals, opp_normal) # dot each normal with opp_normal
+        
+        # Filter candidates based on dot product threshold
+        # A threshold like dot_products > 0.95 means cos(theta) ~ 0.95, angle ~ >160 degrees.
+        candidates = np.where(dot_products > 0.95)[0]
+        
+        for c in candidates:
+            if c == i:
+                continue
+            p2 = pc_points[c]
+            n2 = pc_normals[c]
+            
+            # Check distance constraint
+            dist = np.linalg.norm(p2 - p1)
+            if dist <= w_max:
+                # Evaluate how good this pair is
+                # One metric: just use the dot product to pick the best opposite normals
+                score = dot_products[c]
+                if score > best_score:
+                    best_score = score
+                    best_pair = (p1, p2, n1, n2)
+    
+    # If no pair found, default to something
+    if best_pair is None:
+        # No antipodal grasp found – fallback strategy
+        # Just place gripper at origin
+        return np.array([0., 0., 0.1, 0.])  # some safe default pose
+    
+    p1, p2, n1, n2 = best_pair
+    grasp_center = 0.5 * (p1 + p2)
+    
+    # Compute orientation angle
+    d = p2 - p1
+    # angle relative to x-axis
+    theta = np.arctan2(d[1], d[0])
+    
+    # Set gripper z a bit above the contact points
+    # Add a small offset above the object
+    z_gripper = max(p1[2], p2[2]) + 0.02
+    
+    gripper_pose = np.array([grasp_center[0], grasp_center[1], z_gripper, theta])
     # ------------------------------------------------
 
     return gripper_pose
