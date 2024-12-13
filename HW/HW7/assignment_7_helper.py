@@ -39,7 +39,7 @@ class World:
         # red block
         ori_red = np.array([0., 0., 0., 1.])  # [0.5, 0.35, 1.]
         pos_red = np.array([0.105, 0.23, 0.2])  # np.array([0.1, 0.1, 0.2])
-        block_id = p.loadURDF("red_block.urdf", [0, 0, 0.05])
+        block_id = p.loadURDF("/home/fishros/ROB599/HW/HW7/red_block.urdf", [0, 0, 0.05])
         p.changeDynamics(block_id, -1, mass=0.8, lateralFriction=0.89)
         p.resetBasePositionAndOrientation(block_id, pos_red, ori_red)
         self.block_id.append(block_id)
@@ -47,7 +47,7 @@ class World:
         # green block
         ori_green = np.array([0., 0., 0., 1.])  # [0.5, 0.35, 1.]
         pos_green = np.array([0.05, 0.23, 0.2])  # np.array([0.1, 0.1, 0.2])
-        block_id = p.loadURDF("green_block.urdf", [0, 0, 0.05])
+        block_id = p.loadURDF("/home/fishros/ROB599/HW/HW7/green_block.urdf", [0, 0, 0.05])
         p.changeDynamics(block_id, -1, mass=0.8, lateralFriction=0.89)
         p.resetBasePositionAndOrientation(block_id, pos_green, ori_green)
         self.block_id.append(block_id)
@@ -55,7 +55,7 @@ class World:
         # blue block
         ori_blue = np.array([0., 0., 0., 1.])  # [0.5, 0.35, 1.]
         pos_blue = np.array([-0.005, 0.23, 0.2])  # np.array([0.1, 0.1, 0.2])
-        block_id = p.loadURDF("blue_block.urdf", [0, 0, 0.05])
+        block_id = p.loadURDF("/home/fishros/ROB599/HW/HW7/blue_block.urdf", [0, 0, 0.05])
         p.changeDynamics(block_id, -1, mass=0.8, lateralFriction=0.89)
         p.resetBasePositionAndOrientation(block_id, pos_blue, ori_blue)
         self.block_id.append(block_id)
@@ -63,7 +63,7 @@ class World:
         # box block
         ori_box = np.array([0., 0., 0., 1.])  # [0.5, 0.35, 1.]
         pos_box = np.array([-0.06, 0.23, 0.2])  # np.array([0.1, 0.1, 0.2])
-        block_id = p.loadURDF("box.urdf", [0, 0, 0.05])
+        block_id = p.loadURDF("/home/fishros/ROB599/HW/HW7/box.urdf", [0, 0, 0.05])
         p.changeDynamics(block_id, -1, mass=0.8, lateralFriction=0.89)
         p.resetBasePositionAndOrientation(block_id, pos_box, ori_box)
 
@@ -71,7 +71,7 @@ class World:
 
         # add fixture
         pos_fix = np.array([0., -0.15, 0.05])  # np.array([0.1, 0.1, 0.2])
-        fix_id = p.loadURDF("fixture.urdf", pos_fix, useFixedBase=1)
+        fix_id = p.loadURDF("/home/fishros/ROB599/HW/HW7/fixture.urdf", pos_fix, useFixedBase=1)
 
         for sim_step in range(300):
             p.stepSimulation()
